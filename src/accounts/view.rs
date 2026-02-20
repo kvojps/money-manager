@@ -4,7 +4,7 @@ pub fn render_add_account(name: &str, cents: i64) -> String {
     format!("Conta cadastrada: {name} - {}", format_cents(cents))
 }
 
-pub fn render_list_accounts(rows: &[(i64, String, i64)]) -> String {
+pub fn render_list_accounts(rows: &[(i64, String, i64)], total_cents: i64) -> String {
     if rows.is_empty() {
         return "Nenhuma conta cadastrada.".to_string();
     }
@@ -16,5 +16,6 @@ pub fn render_list_accounts(rows: &[(i64, String, i64)]) -> String {
         }
         output.push_str(&format!("#{id} | {name} | {}", format_cents(*cents)));
     }
+    output.push_str(&format!("\n\nTOTAL: {}", format_cents(total_cents)));
     output
 }
