@@ -37,7 +37,7 @@ fn main() {
         }
     };
 
-    let conn = match Connection::open(db_path) {
+    let mut conn = match Connection::open(db_path) {
         Ok(conn) => conn,
         Err(err) => {
             eprintln!("Erro ao abrir o banco: {err}");
@@ -45,7 +45,7 @@ fn main() {
         }
     };
 
-    if let Err(err) = init_db(&conn) {
+    if let Err(err) = init_db(&mut conn) {
         eprintln!("Erro ao inicializar o banco: {err}");
         std::process::exit(1);
     }
