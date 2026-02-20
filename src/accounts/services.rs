@@ -1,11 +1,11 @@
-use super::schemas::Account;
+use super::schemas::{Account, CreateAccountInput};
 use rusqlite::{Connection, params};
 
 // Add account
-pub fn add_account(conn: &Connection, name: &str, cents: i64) -> rusqlite::Result<()> {
+pub fn add_account(conn: &Connection, input: CreateAccountInput) -> rusqlite::Result<()> {
     conn.execute(
         "INSERT INTO accounts (name, amount_cents) VALUES (?1, ?2)",
-        params![name, cents],
+        params![input.name, input.amount_cents],
     )?;
     Ok(())
 }
