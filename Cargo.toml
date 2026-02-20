@@ -8,3 +8,5 @@ clap = { version = "4.5", features = ["derive"] }
 rusqlite = { version = "0.31", features = ["bundled"] }
 dirs = "5.0"
 refinery = { version = "0.8", features = ["rusqlite"] }
+comfy-table = "7.1"
+owo-colors = "4.0"
