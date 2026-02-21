@@ -62,3 +62,9 @@ pub fn format_cents(cents: i64) -> String {
         format!("{}.{:02}", whole, frac)
     }
 }
+
+pub fn parse_account_id(account: &str) -> Result<i64, String> {
+    account
+        .parse::<i64>()
+        .map_err(|_| format!("ID da conta inválido: '{}'. Deve ser um número inteiro", account))
+}

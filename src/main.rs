@@ -4,6 +4,7 @@ mod transactions;
 use accounts::controller::{handle_add, handle_list};
 use clap::{Parser, Subcommand};
 use core::db::{build_db_path, init_db};
+use core::utils::parse_account_id;
 use rusqlite::Connection;
 use transactions::controller::handle_add_transaction;
 
@@ -19,28 +20,44 @@ struct Cli {
 // Commands
 #[derive(Subcommand)]
 enum Commands {
-    Add {
-        #[arg(short, long)]
-        name: String,
-        #[arg(short, long, help = "Valor com duas casas, ex: 123.45")]
-        value: String,
+    #[command(alias = "acc")]
+    Account {
+        #[command(subcommand)]
+        cmd: AccountCommands,
     },
-    List,
     Tx {
         #[command(subcommand)]
-        command: TxCommands,
+        cmd: TxCommands,
     },
 }
+
+#[derive(Subcommand)]
+enum AccountCommands {
+    Add {
+        name: String,
+        #[arg(help = "Valor com duas casas, ex: 123.45")]
+        value: String,
+    },
+    #[command(alias = "ls")]
+    List,
+}
+
 #[derive(Subcommand)]
 enum TxCommands {
-    Add {
-        #[arg(short, long, help = "ID da conta")]
-        account_id: i64,
-        #[arg(short, long, help = "Tipo de transação: 'add' ou 'subtract'")]
-        tx_type: String,
-        #[arg(short, long, help = "Valor com duas casas, ex: 123.45")]
+    #[command(name = "in")]
+    In {
+        #[arg(help = "ID da conta ou nome da conta")]
+        account: String,
+        #[arg(help = "Valor com duas casas, ex: 123.45")]
         value: String,
-        #[arg(short, long, help = "Descrição da transação (opcional)")]
+    },
+    #[command(name = "out")]
+    Out {
+        #[arg(help = "ID da conta ou nome da conta")]
+        account: String,
+        #[arg(help = "Valor com duas casas, ex: 123.45")]
+        value: String,
+        #[arg(short, long, help = "Descrição da transação")]
         description: Option<String>,
     },
 }
@@ -68,33 +85,61 @@ fn main() {
     }
 
     match cli.command {
-        Commands::Add { name, value } => match handle_add(&conn, &name, &value) {
-            Ok(output) => println!("{output}"),
-            Err(err) => {
-                eprintln!("{err}");
-                std::process::exit(1);
-            }
-        },
-        Commands::List => match handle_list(&conn) {
-            Ok(output) => println!("{output}"),
-            Err(err) => {
-                eprintln!("{err}");
-                std::process::exit(1);
-            }
-        },
-        Commands::Tx { command } => match command {
-            TxCommands::Add {
-                account_id,
-                tx_type,
-                value,
-                description,
-            } => match handle_add_transaction(&conn, account_id, &tx_type, &value, description) {
+        Commands::Account { cmd } => match cmd {
+            AccountCommands::Add { name, value } => match handle_add(&conn, &name, &value) {
                 Ok(output) => println!("{output}"),
                 Err(err) => {
                     eprintln!("{err}");
                     std::process::exit(1);
                 }
             },
+            AccountCommands::List => match handle_list(&conn) {
+                Ok(output) => println!("{output}"),
+                Err(err) => {
+                    eprintln!("{err}");
+                    std::process::exit(1);
+                }
+            },
+        },
+        Commands::Tx { cmd } => match cmd {
+            TxCommands::In { account, value } => {
+                match parse_account_id(&account) {
+                    Ok(account_id) => {
+                        match handle_add_transaction(&conn, account_id, "add", &value, None) {
+                            Ok(output) => println!("{output}"),
+                            Err(err) => {
+                                eprintln!("{err}");
+                                std::process::exit(1);
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        eprintln!("{err}");
+                        std::process::exit(1);
+                    }
+                }
+            }
+            TxCommands::Out {
+                account,
+                value,
+                description,
+            } => {
+                match parse_account_id(&account) {
+                    Ok(account_id) => {
+                        match handle_add_transaction(&conn, account_id, "subtract", &value, description) {
+                            Ok(output) => println!("{output}"),
+                            Err(err) => {
+                                eprintln!("{err}");
+                                std::process::exit(1);
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        eprintln!("{err}");
+                        std::process::exit(1);
+                    }
+                }
+            }
         },
     }
 }

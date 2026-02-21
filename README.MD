@@ -7,21 +7,30 @@ CLI em Rust para controlar contas bancárias e saldos no terminal.
 - Cadastrar contas bancárias com saldo;
 
     ```bash
-    money-manager add --name "Conta Corrente BB" --value 1500.00
-    money-manager add -n "Poupança Itaú" -v 5000,50
+    money-manager account add "Conta Corrente BB" 1500.00
+    money-manager acc add "Poupança Itaú" 5000.50
     ```
 
 - Listar contas e saldos;
 
     ```bash
-    money-manager list
+    money-manager account list
+    money-manager account ls
+    money-manager acc ls
     ```
 
-- Registrar transações;
+- Registrar transações de entrada;
 
     ```bash
-    money-manager tx add --account-id 1 --tx-type add --value 500.00
-    money-manager tx add --account-id 1 --tx-type subtract --value 250.00 --description "Compra no mercado"
+    money-manager tx in 1 500.00
+    money-manager tx in "Conta Corrente BB" 500.00
+    ```
+
+- Registrar transações de saída;
+
+    ```bash
+    money-manager tx out 1 250.00
+    money-manager tx out 1 250.00 -d "Compra no mercado"
     ```
 
 ## 🚀 Instalação
