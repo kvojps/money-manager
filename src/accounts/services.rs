@@ -29,7 +29,7 @@ pub fn list_accounts(conn: &Connection) -> rusqlite::Result<(Vec<Account>, i64)>
 }
 
 fn _fetch_accounts(conn: &Connection) -> rusqlite::Result<Vec<(i64, String, i64)>> {
-    let mut stmt = conn.prepare("SELECT id, name, amount_cents FROM accounts ORDER BY id ASC")?;
+    let mut stmt = conn.prepare("SELECT id, name, amount_cents FROM accounts ORDER BY amount_cents DESC")?;
     let rows = stmt.query_map([], |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)))?;
 
     rows.collect()
